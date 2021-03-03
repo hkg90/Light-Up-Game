@@ -112,8 +112,8 @@ class button():
 
     def assign_cell(self, state):
         self.state = state
-        # Update cell to light bulb or 'beam' status
-        if state in [1, 2]:
+        # Update cell to white cell, light bulb cell or 'beam' cell
+        if state in [0, 1, 2]:
             text = ' '
         # Update cell to black background with inside cell text ('' or number)
         elif state > 2:
@@ -157,5 +157,31 @@ while True:
     # Close game if window closed
     if event == None:
         break
+    x, y = event
 
-    elif isinstance(event, tuple)
+    # Add light bulb if cell is white or yellow
+    if board[x][y].state == 0 or board[x][y].state == 2:
+        board[x][y].assign_cell(1)
+    # Update cell from light bulb to white
+    elif board[x][y].state == 1:
+        # Check adjacent cells to see if row/ column is also in a 'beam'
+        inBeam = False
+        range = [0, 1, 2, 3, 4, 5, 6]
+        if (x-1) in range and y in range:
+            if board[x-1][y].state == 2:
+                inBeam = True
+        if (x+1) in range and y in range:
+            if board[x+1][y].state == 2:
+                inBeam = True
+        if x in range and (y-1) in range:
+            if board[x][y-1].state == 2:
+                inBeam = True
+        if x in range and (y+1) in range:
+            if board[x][y+1].state == 2:
+                inBeam = True
+        if inBeam:
+            board[x][y].assign_cell(2)
+
+        # If not row/ column not in 'beam', update to white cell
+        else:
+            board[x][y].assign_cell(0)
