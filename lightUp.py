@@ -12,6 +12,7 @@ width = 7
 height = 7
 blankBlackBox = []
 numberedBlackBox = []
+lightBulbCells = []
 restart = True
 size = (30, 30)
 # PNG images graphic's Base64 byte string
@@ -32,8 +33,9 @@ yellowIcon = \
 image = [whiteIcon, lightBulbIcon, yellowIcon, blkBlank, blkZero, blkOne, blkTwo,
          blkThree,
          blkFour]
-color = [('black', 'white'), ('black', 'white'), ('black', 'yellow'), ('black',
-                                                                    'black'), ('black', 'black'), ('black','black'), ('black','black'), ('black','black') , ('black','black') ]
+color = [('black', 'white'), ('black', 'yellow'), ('black', 'yellow'),
+         ('black',
+                                                                    'black'), ('black', 'pink'), ('black','pink'), ('black','pink'), ('black','pink') , ('black','black') ]
 
 
 
@@ -83,6 +85,91 @@ def load_black_boxes():
         new_state = cell[2] + 4
         board[row][col].assign_cell(new_state)
 
+
+# Function updates board with beams of each light bulb present
+def add_beams():
+    board_range = [0, 1, 2, 3, 4, 5, 6]
+
+    # Clear board of old beams
+    for row in board:
+        for cell in row:
+            if cell.state == 2:
+                cell.assign_cell(0)
+
+    for row in board:
+        for cell in row:
+            if cell.state == 2:
+                print('board not clear of yellow cells')
+
+    # Update color along right side of light bulb
+    # Add beam for each light bulb in board
+    for light_bulb in lightBulbCells:
+        x_index = light_bulb[0]
+        y_index = light_bulb[1]
+        # Update color below light bulb
+        while True:
+            y_index += 1
+            if y_index not in board_range or board[x_index][y_index].state in range(3, 9):
+                print('break')
+                break
+            elif board[x_index][y_index].state == 0:
+                board[x_index][y_index].assign_cell(2)
+        y_index = light_bulb[1]
+        # Update color above light bulb
+        while True:
+            y_index -= 1
+            if y_index not in board_range or board[x_index][y_index].state in range(3, 9):
+                print('break')
+                break
+            elif board[x_index][y_index].state == 0:
+                board[x_index][y_index].assign_cell(2)
+        y_index = light_bulb[1]
+    # Update color to left of light bulb:
+        while True:
+            x_index -= 1
+            if x_index not in board_range or board[x_index][y_index].state in range(3, 9):
+                print('break')
+                break
+            elif board[x_index][y_index].state == 0:
+                board[x_index][y_index].assign_cell(2)
+        x_index = light_bulb[0]
+        # Update coloring right of light bulb
+        while True:
+            x_index += 1
+            if x_index not in board_range or board[x_index][y_index].state in range(3, 9):
+                print('break')
+                break
+            elif board[x_index][y_index].state == 0:
+                board[x_index][y_index].assign_cell(2)
+
+
+# Updates board with white or yellow ('beam') cells
+# def update_cell(x, y):
+#     board_range = [0, 1, 2, 3, 4, 5, 6]
+#     inBeam = False
+#
+#     # Update cell from light bulb to white
+#     elif board[x][y].state == 1:
+#         # Check adjacent cells to see if row/ column is also in a 'beam'
+#         if (x - 1) in board_range and y in board_range:
+#             if board[x - 1][y].state == 2:
+#                 inBeam = True
+#         if (x + 1) in board_range and y in board_range:
+#             if board[x + 1][y].state == 2:
+#                 inBeam = True
+#         if x in board_range and (y - 1) in board_range:
+#             if board[x][y - 1].state == 2:
+#                 inBeam = True
+#         if x in board_range and (y + 1) in board_range:
+#             if board[x][y + 1].state == 2:
+#                 inBeam = True
+#         if inBeam:
+#             board[x][y].assign_cell(2)
+#
+#         # If not row/ column not in 'beam', update to white cell
+#         else:
+#             update_beam(x, y, 0)
+#             board[x][y].assign_cell(0)
 
 
 
@@ -159,29 +246,13 @@ while True:
         break
     x, y = event
 
-    # Add light bulb if cell is white or yellow
-    if board[x][y].state == 0 or board[x][y].state == 2:
+    if board[x][y].state == 1:
+        board[x][y].assign_cell(0)
+        lightBulbCells.remove([x, y])
+    elif board[x][y].state in [0, 2]:
         board[x][y].assign_cell(1)
-    # Update cell from light bulb to white
-    elif board[x][y].state == 1:
-        # Check adjacent cells to see if row/ column is also in a 'beam'
-        inBeam = False
-        range = [0, 1, 2, 3, 4, 5, 6]
-        if (x-1) in range and y in range:
-            if board[x-1][y].state == 2:
-                inBeam = True
-        if (x+1) in range and y in range:
-            if board[x+1][y].state == 2:
-                inBeam = True
-        if x in range and (y-1) in range:
-            if board[x][y-1].state == 2:
-                inBeam = True
-        if x in range and (y+1) in range:
-            if board[x][y+1].state == 2:
-                inBeam = True
-        if inBeam:
-            board[x][y].assign_cell(2)
+        lightBulbCells.append([x, y])
+    add_beams()
 
-        # If not row/ column not in 'beam', update to white cell
-        else:
-            board[x][y].assign_cell(0)
+
+
