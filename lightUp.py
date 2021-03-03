@@ -10,9 +10,11 @@ font = 'Arial 16 bold'
 # width and height of board, 7x7 grid
 width = 7
 height = 7
+whiteCells = [width * height]
 blankBlackBox = []
 numberedBlackBox = []
 lightBulbCells = []
+
 restart = True
 size = (30, 30)
 # PNG images graphic's Base64 byte string
@@ -68,7 +70,6 @@ def load_black_boxes():
         if '\n' in num_box:
             num_box = num_box.strip()
         divided = list(map(int, num_box.split(',')))
-
         numberedBlackBox.append(divided)
 
     # Assign blank black background cells
@@ -85,9 +86,10 @@ def load_black_boxes():
         new_state = cell[2] + 4
         board[row][col].assign_cell(new_state)
 
+    whiteCells[0] = whiteCells[0] - len(numberedBlackBox) - len(blankBlackBox)
 
 # Function updates board with beams of each light bulb present
-def add_beams():
+def update_beams():
     board_range = [0, 1, 2, 3, 4, 5, 6]
 
     # Clear board of old beams
@@ -95,11 +97,6 @@ def add_beams():
         for cell in row:
             if cell.state == 2:
                 cell.assign_cell(0)
-
-    for row in board:
-        for cell in row:
-            if cell.state == 2:
-                print('board not clear of yellow cells')
 
     # Update color along right side of light bulb
     # Add beam for each light bulb in board
@@ -114,6 +111,7 @@ def add_beams():
                 break
             elif board[x_index][y_index].state == 0:
                 board[x_index][y_index].assign_cell(2)
+
         y_index = light_bulb[1]
         # Update color above light bulb
         while True:
@@ -123,6 +121,7 @@ def add_beams():
                 break
             elif board[x_index][y_index].state == 0:
                 board[x_index][y_index].assign_cell(2)
+
         y_index = light_bulb[1]
     # Update color to left of light bulb:
         while True:
@@ -132,6 +131,7 @@ def add_beams():
                 break
             elif board[x_index][y_index].state == 0:
                 board[x_index][y_index].assign_cell(2)
+
         x_index = light_bulb[0]
         # Update coloring right of light bulb
         while True:
@@ -143,35 +143,102 @@ def add_beams():
                 board[x_index][y_index].assign_cell(2)
 
 
-# Updates board with white or yellow ('beam') cells
-# def update_cell(x, y):
-#     board_range = [0, 1, 2, 3, 4, 5, 6]
-#     inBeam = False
-#
-#     # Update cell from light bulb to white
-#     elif board[x][y].state == 1:
-#         # Check adjacent cells to see if row/ column is also in a 'beam'
-#         if (x - 1) in board_range and y in board_range:
-#             if board[x - 1][y].state == 2:
-#                 inBeam = True
-#         if (x + 1) in board_range and y in board_range:
-#             if board[x + 1][y].state == 2:
-#                 inBeam = True
-#         if x in board_range and (y - 1) in board_range:
-#             if board[x][y - 1].state == 2:
-#                 inBeam = True
-#         if x in board_range and (y + 1) in board_range:
-#             if board[x][y + 1].state == 2:
-#                 inBeam = True
-#         if inBeam:
-#             board[x][y].assign_cell(2)
-#
-#         # If not row/ column not in 'beam', update to white cell
-#         else:
-#             update_beam(x, y, 0)
-#             board[x][y].assign_cell(0)
 
 
+def verifier():
+    # Ensure no white spaces remain on board, if yes then return False
+    for row in board:
+        for cell in row:
+            if cell.state == 0:
+                return False
+    # Check board for beams that may have more than 1 light bulb in it. If overlapping,
+    # return False
+    for light_bulb in lightBulbCells:
+        board_range = [0, 1, 2, 3, 4, 5, 6]
+        x_index = light_bulb[0]
+        y_index = light_bulb[1]
+
+        while True:
+            y_index += 1
+            if y_index not in board_range or board[x_index][y_index].state in range(3, 9):
+                break
+            elif board[x_index][y_index].state == 1:
+                return False
+        y_index = light_bulb[1]
+        # Update color above light bulb
+        while True:
+            y_index -= 1
+            if y_index not in board_range or board[x_index][y_index].state in range(3, 9):
+                break
+            elif board[x_index][y_index].state == 1:
+                return False
+        y_index = light_bulb[1]
+        # Update color to left of light bulb:
+        while True:
+            x_index -= 1
+            if x_index not in board_range or board[x_index][y_index].state in range(3, 9):
+                break
+            elif board[x_index][y_index].state == 1:
+                return False
+        x_index = light_bulb[0]
+        # Update coloring right of light bulb
+        while True:
+            x_index += 1
+            if x_index not in board_range or board[x_index][y_index].state in range(3, 9):
+                break
+            elif board[x_index][y_index].state == 1:
+                return False
+
+    # Ensure that each numbered black box has appropriate number of directly
+    # adjacent light bulbs
+    for box in numberedBlackBox:
+        y_index = box[0] - 1
+        x_index = box[1] - 1
+        bulb_tally = 0
+        # Check cell below numbered box (if applicable)
+        y_index += 1
+        if y_index in board_range and board[x_index][y_index].state == 1:
+            bulb_tally += 1
+
+        # Check cell above numbered box (if applicable)
+        y_index = box[0] - 1
+        y_index -= 1
+        if y_index in board_range and board[x_index][y_index].state == 1:
+            bulb_tally += 1
+
+        # Check cell left of numbered box (if applicable)
+        y_index = box[0] - 1
+        x_index -= 1
+        if x_index in board_range and board[x_index][y_index].state == 1:
+            bulb_tally += 1
+
+        # Check cell right of numbered box (if applicable)
+        x_index = box[1] - 1
+        x_index += 1
+        if x_index in board_range and board[x_index][y_index].state == 1:
+            bulb_tally += 1
+
+        # Determine if tally is valid
+        if bulb_tally != box[2]:
+            return False
+
+    return True
+
+def reset():
+    # Reset status of light bulb cells to white
+    for light_bulb in lightBulbCells:
+        x = light_bulb[0]
+        y = light_bulb[1]
+        board[x][y].assign_cell(0)
+
+    # Clear list
+    lightBulbCells.clear()
+
+    # Reset yellow 'beam' cells to white
+    for row in board:
+        for cell in row:
+            if cell.state == 2:
+                cell.assign_cell(0)
 
 # Class for game board's button objects
 class button():
@@ -224,9 +291,9 @@ board = [[0 for j in range(height)] for i in range(width)]
 
 
 # Create layout of window
-layout = [[menu_buttons('Reset Board', key='-New Game-'), menu_buttons(
-    'Solve', key='-Solve Game-'), menu_buttons(
-    'Check: Did I win?', key='-Solve Game-'),]]+[[grid_button(x, y) for x in range(
+layout = [[menu_buttons('Reset Board', key='-Reset Game-'), menu_buttons(
+    'Auto-Solve', key='-Solve Game-'), menu_buttons(
+    'Submit', key='-Check Game-'),]]+[[grid_button(x, y) for x in range(
     width)] for y in range(height)]
 
 # Create window to display game board
@@ -244,15 +311,29 @@ while True:
     # Close game if window closed
     if event == None:
         break
-    x, y = event
 
-    if board[x][y].state == 1:
-        board[x][y].assign_cell(0)
-        lightBulbCells.remove([x, y])
-    elif board[x][y].state in [0, 2]:
-        board[x][y].assign_cell(1)
-        lightBulbCells.append([x, y])
-    add_beams()
+    # Clear board if user hits "Reset" button
+    elif event == '-Reset Game-':
+        reset()
+        update_beams()
+
+    elif event == '-Check Game-':
+        game_result = verifier()
+        if game_result:
+            sg.popup('You win!', title='Note:')
+        else:
+            sg.popup('You lost... Try again!', title='Note:')
+
+    else:
+        x, y = event
+
+        if board[x][y].state == 1:
+            board[x][y].assign_cell(0)
+            lightBulbCells.remove([x, y])
+        elif board[x][y].state in [0, 2]:
+            board[x][y].assign_cell(1)
+            lightBulbCells.append([x, y])
+        update_beams()
 
 
 
