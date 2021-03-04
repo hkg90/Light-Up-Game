@@ -125,12 +125,12 @@ while True:
     # Clear board if user hits "Reset" button
     elif event == '-Reset Game-':
         func.reset(board, lightBulbCells)
-        func.update_beams(board, lightBulbCells)
+        func.update_beams(board)
 
     # Initiate 'Solver'
     elif event == '-Solve Game-':
-        auto.setup_solver(board, numberedBlackBox)
-        auto.solver(board)
+        cells_to_try = auto.setup_solver(board, numberedBlackBox)
+        auto.solver(board, cells_to_try)
 
     # Initiate 'Verifier'
     elif event == '-Check Game-':
@@ -149,7 +149,7 @@ while True:
         elif board[x][y].state in [0, 2]:
             board[x][y].assign_cell(1)
             lightBulbCells.append([x, y])
-        func.update_beams(board, lightBulbCells)
+        func.update_beams(board)
 
 
 

@@ -59,13 +59,15 @@ def reset(board, lightBulbCells):
 
 
 # Function updates board with beams of each light bulb present (if applicable)
-def update_beams(board, lightBulbCells):
+def update_beams(board):
     board_range = [0, 1, 2, 3, 4, 5, 6]
-
+    lightBulbCells = []
     # Clear board of old beams
     for col in board:
         for cell in col:
-            if cell.state == 2:
+            if cell.state == 1:
+                lightBulbCells.append([cell.x, cell.y])
+            elif cell.state == 2:
                 cell.assign_cell(0)
 
     # Update color along right side of light bulb
