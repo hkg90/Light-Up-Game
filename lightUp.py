@@ -1,22 +1,21 @@
 import PySimpleGUI as sg
-import random
-import sys
+import board_functions as func
+import verifier as algo
+import solver as auto
+
 
 # Reference light bulb .png file: https://iconarchive.com/search?q=lightbulb
 
-# Light Up Game GUI
-
+# Global constants for setting up game board:
 font = 'Arial 16 bold'
-# width and height of board, 7x7 grid
-width = 7
+width = 7 # width and height of board, 7x7 grid
 height = 7
-whiteCells = [width * height]
 blankBlackBox = []
 numberedBlackBox = []
 lightBulbCells = []
-
 restart = True
 size = (30, 30)
+
 # PNG images graphic's Base64 byte string
 lightBulbIcon = b'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAidJREFUeNp0U89rE0EU/ja7kZRWQwOS2sRgEayiRFGp9JBL/oN4EbyJtSG3eFFEpEUvHiMUpPXoteCPP8CbF1FQY6vWom2zCdt00yZx0242u7O+nbVl3awP3sybN9/73puZN4Jt2/DLm9lwjqZp0om/rnekC9nZ3gs/VvASUGCCpvupKzcK8XQOA9Ek9+utKpTyK8jvn88zs/uIiKr7MZKXLSRFHpzNPcnHTpyHbW7D7v3i/sjQAMYyUxgey+SXX94WyXXrIMaT/fqx9NX8cGIUbPcTbKMCmCpXx3Z80XgMI+nclIPtIyApjJyZgLX7GaynBqqzFz91kWODCC6IwjcquwFx6DJsq032lquWBnHwErdFfOXYIALL6qzA2vuJnroI6XCG7kGj4A4RTnKfpVdgapzACrrED53tZvbIUZOYmmDKM0SOz1CKCPS1u7DZb9AAraHtP2tfBU/lpXUwy6KsJpjRoHPX+ZFYb8f10V51eYNj+wjobRc1tTEnl9d4JledHrEP1vKXdWiqOudtKMnXWHeU1aoYkoTC6OmkG+yMFKys1KD8kJ3M9/7pHe+CmPdoeri5uulmhVsBM03UvtccyGPCaN4YfwV4O/5RidVfw6iP4+RgEnV1C+Wla6jokyx87uZG1ocPIUBCUhSxaII+ShhhegXTOIR2hwVjg5yGYaDVanN7p9lEt6vjfyIEfWdHisXivKIo0w5ZKpVaKJVK+SDcHwEGAD5qJSG2+HXsAAAAAElFTkSuQmCC'
 blkBlank = b'iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAA0SURBVFhH7c6xDQAgDANBh/13TijYIQX3kuX2KknfrXXerwUAAAAAAAAAAAAAAAAA8DsgGSESAT8rDAeCAAAAAElFTkSuQmCC'
@@ -25,21 +24,15 @@ blkOne = b'iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQ
 blkTwo = b'iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAFuSURBVFhH1ZbNbcMwDIWZzpJcMgI3aAdRjl1F13YQZYJmgiCHsruoFK0U/nmW7TiNnQd8oEFYokzSkjZEFJXF9JLtsJjJ+WCIRIqxiUjyB/KOifOQMRq/gH9UKkEPHF0QY5IkRE2EgedtgJzOmBq3IfGGlqM1dwfgZG/U40vwra/S7HjNjlJScLV5AWvtgVwCzUFwbOD3KlzIn4sU0lx4XAY6J8GlMgws4C4lOF0kP03X4j1wlwXwfpefuvr5PuenfsHajCM1J0fcAskp0Q9sRvMOIxfMxI9Xsw0dD2Y2b59m+7T2s6BE2if0L7N0t1Wlfij9GegcpLT5iC9vXHWeswRzdj4AdEJS4N7g44/fNtDZpVx0C3xD8GfoAXA5+dPtaa8DnRU5MK663vv0nQQcOx7kvF5I+lQFx2OnsXgPwMNIfzWzX+9bs3N1PKQwROhcekgGdns2kOAC0hVrzjWrLbmcDKR19sAjtXAGiH4B+bdvSXOmRtQAAAAASUVORK5CYII='
 blkThree = b'iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAGRSURBVFhH7Ze7ccMwDIaRzCK5yGUCjJA0qTICU2aJdGlYewT3lieIRkgRaBcaACWfbIGibMcnx5f/7jv6YFF8ASB0BwCBmU33bTubpk0AneIrUogChDCESP4jqBwCSrfYOys5AgNUeEB+9wmiSvEIij2GYhld4O7K2SKv8G4Y4yiGEX2Qde/W3q7GISr7z/Jk+cHcRlWu16fH7E4oMmYmR0ARd7BiC96xwa4diHzyPabxSJwy5jepCfyRPHBhmVtzDOhJsRU9YyQXmMY8Eo4Slpn4k7MfcUDBNO5wJ2WjGD1TIugiPtBsCH64FXK6fidMO9dEdWnceHeLaZyAnC8GdH7SXdBdSIeX0i9VRPHm9/Sl7XuhzUCbNxkO4GmpjepWMmGtrNaNklL5gEpft7IDUY+LQkmJvmulr+vMAxr7XPoKlXd2KdbBJZkUrtniNRGGzMBwYv5PSSZ25G14dvYTtRkwV5anE5F8jLD86wssnkv9XRbRwQZu1sTQa2it7efHCpb1vrOlNLsT/n+czjwBgC3+Qv2qvb+n/QAAAABJRU5ErkJggg=='
 blkFour = b'iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAFBSURBVFhH7Zc7coMwEIZ/5yxJ4yPoBslBlNJp3FG6S6OUzkHECZIjuAjcRdld8ZAJ2GAUgx/fzDeMGthd/QNiAcCRk/FQXCfjQgvQRsycg+swM0rsA2dggMoZejJ7EKvF9nvUDp+ATrB6hBiDAQVo0W6f/VLIkabeU7mcECqzFsP+kb5j8wPxVHoWoJHQprMeHnmOj82nX46gVwFl51X31Dn79l2sR3CkAB+8unPGdx6je2beIdR2KzaDx6OPMX6muwBlsKYns554wQvpLEAnK/DOV7sfMXghfwugzsvua+IGL2R+IeTRl+OviBy8kP0CzhS8JvX3WdviYx4bvq919FrbOwuwZ8rAk7hsOSDNL4T/QybuWkI8+r9AGb458NU8o6Wvclm8HA7wrWxBN1dQwI4ywDbI6ZzIHuP+czpxAcAvccQX5Z33KBAAAAAASUVORK5CYII='
-whiteIcon = \
-    b'iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAAySURBVFhH7c6xAQAgCMTAx/13Bgt3oPDSpL3qWxY772sBAAAAAAAAAAAAAAAAAPwOSAZNiAQ82P7MAwAAAABJRU5ErkJggg=='
-yellowIcon = \
-    b'iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAA0SURBVFhH7c4xAQAgDMTAL/7V1kBZ8NCBy5L1ajqTxc77WgAAAAAAAAAAAAAAAAAAvwOSC24gAzAPqVgaAAAAAElFTkSuQmCC'
+whiteIcon = b'iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAAySURBVFhH7c6xAQAgCMTAx/13Bgt3oPDSpL3qWxY772sBAAAAAAAAAAAAAAAAAPwOSAZNiAQ82P7MAwAAAABJRU5ErkJggg=='
+yellowIcon = b'iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAA0SURBVFhH7c4xAQAgDMTAL/7V1kBZ8NCBy5L1ajqTxc77WgAAAAAAAAAAAAAAAAAAvwOSC24gAzAPqVgaAAAAAElFTkSuQmCC'
 
 # 0: white space, 1: light bulb image, 2: black box, 3: lit up (yellow space)
 
 image = [whiteIcon, lightBulbIcon, yellowIcon, blkBlank, blkZero, blkOne, blkTwo,
-         blkThree,
-         blkFour]
+         blkThree, blkFour]
 color = [('black', 'white'), ('black', 'yellow'), ('black', 'yellow'),
-         ('black',
-                                                                    'black'), ('black', 'pink'), ('black','pink'), ('black','pink'), ('black','pink') , ('black','black') ]
-
-
+         ('black', 'black'), ('black', 'pink'), ('black', 'pink'), ('black', 'pink'), ('black', 'pink'), ('black', 'black')]
 
 # Setting for menu buttons
 def menu_buttons(text, key=None, disabled=False, button_color=('grey',
@@ -47,212 +40,27 @@ def menu_buttons(text, key=None, disabled=False, button_color=('grey',
     return sg.Button(text, pad=(10, 10), font=font, focus=False,
                      key=key, disabled=disabled, button_color=button_color)
 
-# Create button for each grid in board game
+
+# Function creates buttons for each cell in board game
 def grid_button(x, y):
     board[x][y] = button(x, y)
     return board[x][y].button
 
-def load_black_boxes():
-    # Open file
-    new_file = open('gameboards/board1.txt', 'r')
-    num_blank = int(new_file.readline())
-    for i in range(num_blank):
-        blank = new_file.readline()
-        if '\n' in blank:
-            blank = blank.strip()
-        divided = list(map(int, blank.split(',')))
-
-        blankBlackBox.append(divided)
-
-    num_numbered = int(new_file.readline())
-    for i in range(num_numbered):
-        num_box = new_file.readline()
-        if '\n' in num_box:
-            num_box = num_box.strip()
-        divided = list(map(int, num_box.split(',')))
-        numberedBlackBox.append(divided)
-
-    # Assign blank black background cells
-    for cell in blankBlackBox:
-        col = cell[0] - 1
-        row = cell[1] - 1
-        new_state = 3
-        board[row][col].assign_cell(new_state)
-
-    # Assign numbered black background cells
-    for cell in numberedBlackBox:
-        col = cell[0] - 1
-        row = cell[1] - 1
-        new_state = cell[2] + 4
-        board[row][col].assign_cell(new_state)
-
-    whiteCells[0] = whiteCells[0] - len(numberedBlackBox) - len(blankBlackBox)
-
-# Function updates board with beams of each light bulb present
-def update_beams():
-    board_range = [0, 1, 2, 3, 4, 5, 6]
-
-    # Clear board of old beams
-    for row in board:
-        for cell in row:
-            if cell.state == 2:
-                cell.assign_cell(0)
-
-    # Update color along right side of light bulb
-    # Add beam for each light bulb in board
-    for light_bulb in lightBulbCells:
-        x_index = light_bulb[0]
-        y_index = light_bulb[1]
-        # Update color below light bulb
-        while True:
-            y_index += 1
-            if y_index not in board_range or board[x_index][y_index].state in range(3, 9):
-                print('break')
-                break
-            elif board[x_index][y_index].state == 0:
-                board[x_index][y_index].assign_cell(2)
-
-        y_index = light_bulb[1]
-        # Update color above light bulb
-        while True:
-            y_index -= 1
-            if y_index not in board_range or board[x_index][y_index].state in range(3, 9):
-                print('break')
-                break
-            elif board[x_index][y_index].state == 0:
-                board[x_index][y_index].assign_cell(2)
-
-        y_index = light_bulb[1]
-    # Update color to left of light bulb:
-        while True:
-            x_index -= 1
-            if x_index not in board_range or board[x_index][y_index].state in range(3, 9):
-                print('break')
-                break
-            elif board[x_index][y_index].state == 0:
-                board[x_index][y_index].assign_cell(2)
-
-        x_index = light_bulb[0]
-        # Update coloring right of light bulb
-        while True:
-            x_index += 1
-            if x_index not in board_range or board[x_index][y_index].state in range(3, 9):
-                print('break')
-                break
-            elif board[x_index][y_index].state == 0:
-                board[x_index][y_index].assign_cell(2)
 
 
 
-
-def verifier():
-    # Ensure no white spaces remain on board, if yes then return False
-    for row in board:
-        for cell in row:
-            if cell.state == 0:
-                return False
-    # Check board for beams that may have more than 1 light bulb in it. If overlapping,
-    # return False
-    for light_bulb in lightBulbCells:
-        board_range = [0, 1, 2, 3, 4, 5, 6]
-        x_index = light_bulb[0]
-        y_index = light_bulb[1]
-
-        while True:
-            y_index += 1
-            if y_index not in board_range or board[x_index][y_index].state in range(3, 9):
-                break
-            elif board[x_index][y_index].state == 1:
-                return False
-        y_index = light_bulb[1]
-        # Update color above light bulb
-        while True:
-            y_index -= 1
-            if y_index not in board_range or board[x_index][y_index].state in range(3, 9):
-                break
-            elif board[x_index][y_index].state == 1:
-                return False
-        y_index = light_bulb[1]
-        # Update color to left of light bulb:
-        while True:
-            x_index -= 1
-            if x_index not in board_range or board[x_index][y_index].state in range(3, 9):
-                break
-            elif board[x_index][y_index].state == 1:
-                return False
-        x_index = light_bulb[0]
-        # Update coloring right of light bulb
-        while True:
-            x_index += 1
-            if x_index not in board_range or board[x_index][y_index].state in range(3, 9):
-                break
-            elif board[x_index][y_index].state == 1:
-                return False
-
-    # Ensure that each numbered black box has appropriate number of directly
-    # adjacent light bulbs
-    for box in numberedBlackBox:
-        y_index = box[0] - 1
-        x_index = box[1] - 1
-        bulb_tally = 0
-        # Check cell below numbered box (if applicable)
-        y_index += 1
-        if y_index in board_range and board[x_index][y_index].state == 1:
-            bulb_tally += 1
-
-        # Check cell above numbered box (if applicable)
-        y_index = box[0] - 1
-        y_index -= 1
-        if y_index in board_range and board[x_index][y_index].state == 1:
-            bulb_tally += 1
-
-        # Check cell left of numbered box (if applicable)
-        y_index = box[0] - 1
-        x_index -= 1
-        if x_index in board_range and board[x_index][y_index].state == 1:
-            bulb_tally += 1
-
-        # Check cell right of numbered box (if applicable)
-        x_index = box[1] - 1
-        x_index += 1
-        if x_index in board_range and board[x_index][y_index].state == 1:
-            bulb_tally += 1
-
-        # Determine if tally is valid
-        if bulb_tally != box[2]:
-            return False
-
-    return True
-
-def reset():
-    # Reset status of light bulb cells to white
-    for light_bulb in lightBulbCells:
-        x = light_bulb[0]
-        y = light_bulb[1]
-        board[x][y].assign_cell(0)
-
-    # Clear list
-    lightBulbCells.clear()
-
-    # Reset yellow 'beam' cells to white
-    for row in board:
-        for cell in row:
-            if cell.state == 2:
-                cell.assign_cell(0)
 
 # Class for game board's button objects
 class button():
-
     def __init__(self, x, y):
-        self.x          = x
-        self.y          = y
-        self.state      = 0
-        self.color      = color[self.state]
-        self.disabled   = False
-        self.key        = (x, y)             # keys can be ANYTHING,
-        # not just strings
-        self.num        = 0
-        self.button     = sg.Button('',
+        self.x = x
+        self.y = y
+        self.state = 0
+        self.color = color[self.state]
+        self.disabled = False
+        self.key = (x, y)
+        self.num = 0
+        self.button = sg.Button(' ',
             auto_size_button=False,
             border_width=2,
             button_color=self.color,
@@ -262,8 +70,9 @@ class button():
             image_size=size,
             image_data=image[self.state],
             key=self.key,
-            pad=(1,1))
+            pad=(1, 1))
 
+    # Function assigns new state to selected cell in board
     def assign_cell(self, state):
         self.state = state
         # Update cell to white cell, light bulb cell or 'beam' cell
@@ -279,18 +88,20 @@ class button():
         # Update
         self.color = color[self.state]
         window[self.key].Widget['disabledforeground'] = 'black'
-
         self.button.Update(text=text, disabled=self.disabled,
-                           image_data=image[self.state], image_size=(29, 29),
+                           image_data=image[self.state], image_size=(size),
                            button_color=self.color)
 
 
-# Initialize board theme and grid size
+#~~~ Initialize board theme and grid size ~~~#
+
+#Set theme of GUI
 sg.change_look_and_feel('DarkBlue')
+
+# Initialize board grid
 board = [[0 for j in range(height)] for i in range(width)]
 
-
-# Create layout of window
+# Create layout of GUI window
 layout = [[menu_buttons('Reset Board', key='-Reset Game-'), menu_buttons(
     'Auto-Solve', key='-Solve Game-'), menu_buttons(
     'Submit', key='-Check Game-'),]]+[[grid_button(x, y) for x in range(
@@ -301,24 +112,28 @@ window = sg.Window('Light Up', layout=layout, finalize=True)
 
 # Read input game board file for game board's black boxes and respective
 # positions in board
-load_black_boxes()
+func.load_black_boxes(board, blankBlackBox, numberedBlackBox)
 
-
-# Main code to run the game
+# Main code to run the game/ runs game logic
 while True:
     event, values = window.read()
 
-    # Close game if window closed
+    # Exit game if window closed
     if event == None:
         break
 
     # Clear board if user hits "Reset" button
     elif event == '-Reset Game-':
-        reset()
-        update_beams()
+        func.reset(board, lightBulbCells)
+        func.update_beams(board, lightBulbCells)
 
+    # Initiate 'Solver'
+    elif event == '-Solve Game-':
+        auto.solver(board, numberedBlackBox)
+
+    # Initiate 'Verifier'
     elif event == '-Check Game-':
-        game_result = verifier()
+        game_result = algo.verifier(board, lightBulbCells, numberedBlackBox)
         if game_result:
             sg.popup('You win!', title='Note:')
         else:
@@ -333,7 +148,7 @@ while True:
         elif board[x][y].state in [0, 2]:
             board[x][y].assign_cell(1)
             lightBulbCells.append([x, y])
-        update_beams()
+        func.update_beams(board, lightBulbCells)
 
 
 
