@@ -30,9 +30,9 @@ yellowIcon = b'iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAA
 # 0: white space, 1: light bulb image, 2: black box, 3: lit up (yellow space)
 
 image = [whiteIcon, lightBulbIcon, yellowIcon, blkBlank, blkZero, blkOne, blkTwo,
-         blkThree, blkFour]
+         blkThree, blkFour, yellowIcon]
 color = [('black', 'white'), ('black', 'yellow'), ('black', 'yellow'),
-         ('black', 'black'), ('black', 'pink'), ('black', 'pink'), ('black', 'pink'), ('black', 'pink'), ('black', 'black')]
+         ('black', 'black'), ('black', 'pink'), ('black', 'pink'), ('black', 'pink'), ('black', 'pink'), ('black', 'black'), ('black', 'yellow')]
 
 # Setting for menu buttons
 def menu_buttons(text, key=None, disabled=False, button_color=('grey',
@@ -76,7 +76,7 @@ class button():
     def assign_cell(self, state):
         self.state = state
         # Update cell to white cell, light bulb cell or 'beam' cell
-        if state in [0, 1, 2]:
+        if state in [0, 1, 2, 9]:
             text = ' '
         # Update cell to black background with inside cell text ('' or number)
         elif state > 2:
@@ -129,7 +129,8 @@ while True:
 
     # Initiate 'Solver'
     elif event == '-Solve Game-':
-        auto.solver(board, numberedBlackBox)
+        auto.setup_solver(board, numberedBlackBox)
+        auto.solver(board)
 
     # Initiate 'Verifier'
     elif event == '-Check Game-':
