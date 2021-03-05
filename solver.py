@@ -98,22 +98,18 @@ def find_adjacent(board, cell, cell_type):
             y = cell[1]
             if (x in board_range and y in board_range) and board[x][y].state > 3:
                 list_of_adj.append([x, y])
-
         return list_of_adj
 
     # If cell type is numbered box cell, determine if cells directly adjacent are light bulbs
     # If yes, add to list
     if cell_type > 3:
         for cell in adjacent_cells:
-            # If cell below cell in question is a numbered box,
-            # add to list_of_adj
-            # y_index += 1
             x = cell[0]
             y = cell[1]
             if (x in board_range and y in board_range) and board[x][y].state == 1:
-            # if y_index in board_range and board[x_index][y_index].state > 3:
                 list_of_adj.append([x, y])
         return list_of_adj
+
 
 # Function determines if the potential location to place the bulb in is valid
 def valid_placement(board, cell, cell_type):
@@ -121,7 +117,7 @@ def valid_placement(board, cell, cell_type):
     if cell_type == 0:
         return True
     # If potential cell type changing from white cell to light bulb, determine if
-    # its placement does not interfere with beams and numbered boxes (where applicable)
+    # its placement will interfere with beams and numbered boxes (where applicable)
     # on board
     else:
         # Verify bulb placement does not conflict with other beams
@@ -130,12 +126,12 @@ def valid_placement(board, cell, cell_type):
         # Determine if cell has numbered black box(es) around it
         adjacent_to_cell = find_adjacent(board, cell, 0)
 
-        # Verify bulb placement does not conflict with directly adjacent numbered box cells
+        # If bulb placement is directly adjacent to numbered box, ensure its placement is valid
         for num_box in adjacent_to_cell:
             max_bulbs = board[num_box[0]][num_box[1]].state - 4
             adj_bulbs = num_box_tally(board, num_box)
             # If numbered box already has maximum assigned bulbs directly adjacent to it, return
-            # False as placement of another bulb adjacent to the box is not valid
+            # False. Placement is invalid
             if adj_bulbs + 1 > max_bulbs:
                 return False
         # If placement is valid, return True
@@ -144,43 +140,35 @@ def valid_placement(board, cell, cell_type):
 
 # Function recursively determines possible light bulb placements to generate wining certificate solution
 def solver(board, cells_to_try, tried_cells):
-
-    print('cells REMAINING:   ', cells_to_try)
-    print('cells TRIED:   ', tried_cells)
-
     for white_cell in cells_to_try:
         if white_cell not in tried_cells:
-            print('remaining cells to try:  ', cells_to_try)
-            print('trying to assign:  ', white_cell)
             # Set up x and y board coordinate values
             x = white_cell[0]
             y = white_cell[1]
-
             assignment = 1
-            #for assignment in [1]:
-            # for assignment in [1, 0]:
-                # Check bulb placement
-            if valid_placement(board, white_cell, assignment):
 
+            # Check bulb placement
+            if valid_placement(board, white_cell, assignment):
                 # Assign cell new state
                 board[x][y].assign_cell(assignment)
-                print('temp assigned:  ', white_cell)
+                # Update board with beams of all light bulbs now present in board
                 func.update_beams(board)
-                #tried_cells.append([x, y])
+                # Update list of white cells now present in board
                 cells_to_try = get_white_cells(board)
-                print('temp assigned- remaining cells to try: ', cells_to_try)
-
                 # Recursively call solver() function until all placements are deemed valid
-                # of need to backtrack placement
+                # or final solution is found to be valid and function needs to backtrack bulb placement
                 result = solver(board, cells_to_try, tried_cells)
 
-                # If temporary assignment fails, change back cells in board and backtrack solution
+                # If assignment fails, change backtrack solution and bulb placement
                 if not result:
+                    # Un-assign bulb - change back to white cell
                     board[x][y].assign_cell(0)
-                    print('back tracking: unassigned ', white_cell)
+                    # Update board with beams of all light bulbs now present in board
                     func.update_beams(board)
+                    # Update list of white cells now present in board
                     cells_to_try = get_white_cells(board)
-                    cells_to_try.remove([x, y])
+                    # Removed unsuccessfully attempted cell from list
+                    #cells_to_try.remove([x, y])
 
             # If placement was invalid, remove cell from list of potential values to try
             #cells_to_try.remove([x, y])
