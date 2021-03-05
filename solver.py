@@ -85,67 +85,34 @@ def find_adjacent(board, cell, cell_type):
     list_of_adj = []
     x_index = cell[0]
     y_index = cell[1]
+    adjacent_cells = [[x_index, y_index + 1], [x_index, y_index - 1], [x_index + 1, y_index], [x_index - 1, y_index]]
 
-    # If cell type is white cell, continue query to determine if cells adjacent are
-    # or are not numbered boxes
+    # If cell type is white cell, determine if cells directly adjacent are numbered boxes
+    # If yes, add to list
     if cell_type == 0:
-        # If cell below cell in question is a numbered box,
-        # add to list_of_adj
-        y_index += 1
-        if y_index in board_range and board[x_index][y_index].state > 3:
-            list_of_adj.append([x_index, y_index])
+        for cell in adjacent_cells:
+            # If cell below cell in question is a numbered box,
+            # add to list_of_adj
+            # y_index += 1
+            x = cell[0]
+            y = cell[1]
+            if (x in board_range and y in board_range) and board[x][y].state > 3:
+                list_of_adj.append([x, y])
 
-        # If cell above cell in question in question is a numbered box,
-        # add to list_of_adj
-        y_index = cell[1]
-        y_index -= 1
-        if y_index in board_range and board[x_index][y_index].state > 3:
-            list_of_adj.append([x_index, y_index])
-
-        # If cell left of cell in question is a numbered box,
-        # add to list_of_adj
-        y_index = cell[1]
-        x_index -= 1
-        if x_index in board_range and board[x_index][y_index].state > 3:
-            list_of_adj.append([x_index, y_index])
-
-        # If cell right of cell in question is a numbered box,
-        # add to list_of_adj
-        x_index = cell[0]
-        x_index += 1
-        if x_index in board_range and board[x_index][y_index].state > 3:
-            list_of_adj.append([x_index, y_index])
         return list_of_adj
 
-    # If cell type is numbered box cell, continue query to determine if cells adjacent are
-    # occupied by light bulbs
+    # If cell type is numbered box cell, determine if cells directly adjacent are light bulbs
+    # If yes, add to list
     if cell_type > 3:
-        # If cell below box in question is a bulb,
-        # add to list_of_adj
-        y_index += 1
-        if y_index in board_range and board[x_index][y_index].state == 1:
-            list_of_adj.append([x_index, y_index])
-
-        # If cell above box in question in question is a bulb,
-        # add to list_of_adj
-        y_index = cell[1]
-        y_index -= 1
-        if y_index in board_range and board[x_index][y_index].state == 1:
-            list_of_adj.append([x_index, y_index])
-
-        # If cell left of box in question is a bulb,
-        # add to list_of_adj
-        y_index = cell[1]
-        x_index -= 1
-        if x_index in board_range and board[x_index][y_index].state == 1:
-            list_of_adj.append([x_index, y_index])
-
-        # If cell right of box in question is a bulb,
-        # add to list_of_adj
-        x_index = cell[0]
-        x_index += 1
-        if x_index in board_range and board[x_index][y_index].state == 1:
-            list_of_adj.append([x_index, y_index])
+        for cell in adjacent_cells:
+            # If cell below cell in question is a numbered box,
+            # add to list_of_adj
+            # y_index += 1
+            x = cell[0]
+            y = cell[1]
+            if (x in board_range and y in board_range) and board[x][y].state == 1:
+            # if y_index in board_range and board[x_index][y_index].state > 3:
+                list_of_adj.append([x, y])
         return list_of_adj
 
 # Function determines if the potential location to place the bulb in is valid
