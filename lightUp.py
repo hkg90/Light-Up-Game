@@ -137,9 +137,9 @@ while True:
     elif event == '-Solve Game-':
         # Determine given light bulb placements (where applicable) and remaining
         # white cells to submit to solver algorithm
-        cells_to_try = auto.setup_solver(board, numberedBlackBox)
+        cells_to_try = auto.heuristics_solver(board, numberedBlackBox)
         # If found valid solution, display confirmation message
-        if auto.solver(board, cells_to_try, []):
+        if auto.solver(board, cells_to_try):
             sg.popup('Puzzle solved!', title='Note:')
 
     # Initiate 'Verifier' command (from selected 'Submit' button) and

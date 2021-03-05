@@ -10,7 +10,7 @@ import verifier as algo
 # to-be-assigned white cells in game board.
 # Example: A numbered 4 box will require 4 light bulbs directly adjacent to it. This function
 # places the light bulbs there first.
-def setup_solver(board, numbered_black_boxes):
+def heuristics_solver(board, numbered_black_boxes):
     board_range = [0, 1, 2, 3, 4, 5, 6]
 
     # Determine if it's possible to pre-set bulbs for numbered boxes or pre-set squares to yellow
@@ -132,35 +132,34 @@ def valid_placement(board, cell, cell_type):
 
 
 # Function recursively determines possible light bulb placements to generate wining certificate solution
-def solver(board, cells_to_try, tried_cells):
+def solver(board, cells_to_try):
     for white_cell in cells_to_try:
-        if white_cell not in tried_cells:
-            # Set up x and y board coordinate values
-            x = white_cell[0]
-            y = white_cell[1]
-            assignment = 1
+        # Set up x and y board coordinate values
+        x = white_cell[0]
+        y = white_cell[1]
+        assignment = 1
 
-            # Check bulb placement
-            if valid_placement(board, white_cell, assignment):
-                # Assign cell new state
-                board[x][y].assign_cell(assignment)
+        # Check bulb placement
+        if valid_placement(board, white_cell, assignment):
+            # Assign cell new state
+            board[x][y].assign_cell(assignment)
+            # Update board with beams of all light bulbs now present in board
+            func.update_beams(board)
+            # Update list of white cells now present in board
+            cells_to_try = get_white_cells(board)
+
+            # Recursively call solver() function until all placements are deemed valid
+            # or final solution is found to be valid and function needs to backtrack bulb placement
+            result = solver(board, cells_to_try)
+
+            # If assignment fails, change backtrack solution and bulb placement
+            if not result:
+                # Un-assign bulb - change back to white cell
+                board[x][y].assign_cell(0)
                 # Update board with beams of all light bulbs now present in board
                 func.update_beams(board)
                 # Update list of white cells now present in board
                 cells_to_try = get_white_cells(board)
-
-                # Recursively call solver() function until all placements are deemed valid
-                # or final solution is found to be valid and function needs to backtrack bulb placement
-                result = solver(board, cells_to_try, tried_cells)
-
-                # If assignment fails, change backtrack solution and bulb placement
-                if not result:
-                    # Un-assign bulb - change back to white cell
-                    board[x][y].assign_cell(0)
-                    # Update board with beams of all light bulbs now present in board
-                    func.update_beams(board)
-                    # Update list of white cells now present in board
-                    cells_to_try = get_white_cells(board)
 
     # If all cells in cells_to_try have been assigned, determine if certificate solution is valid.
     # If puzzle solved, send completion message.
