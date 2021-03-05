@@ -1,14 +1,17 @@
 Images Source References:
-- Zero black icon, 1 black icon: https, 2 black icon, 3 black icon, 4 black icon: Modified the icon from this source:
+- light bulb icon:
+https://iconarchive.com/show/led-icons-by-led24.de/lightbulb-icon.html
+
+- Zero black icon, 1 black icon: https, 2 black icon, 3 black icon, 4 black icon
+I modified the icon from this source and added the numbers:
 https://iconarchive.com/show/flatastic-6-icons-by-custom-icon-design/Square-icon.html
-
-- light bulb icon: https://iconarchive.com/show/led-icons-by-led24.de/lightbulb-icon.html
-
 
 Python program to convert icon .png to Base64 byte string:
 https://github.com/PySimpleGUI/PySimpleGUI/blob/master/DemoPrograms/Demo_Base64_Image_Encoder.py
 
-Light Up game boards:
+Light Up game board layout:
+- The board#.txt files are setup
+
 https://www.puzzle-light-up.com/
 
 Creating program GUI:

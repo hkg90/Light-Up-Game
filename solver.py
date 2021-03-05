@@ -1,13 +1,15 @@
 # This python file contains the solver algorithm that will determine a valid solution to the set
-# game board.
+# game board layout.
 
 
 import board_functions as func
 import verifier as algo
 
 
-# Function assigns light bulbs to pre-determined board cells (ex: A numbered 4 box requires 4 light bulbs to be placed
-# directly adjacent to it) and determines remaining to-be-assigned white cells in game board
+# Function assigns light bulbs to obvious board placement locations and returns the remaining
+# to-be-assigned white cells in game board.
+# Example: A numbered 4 box will require 4 light bulbs directly adjacent to it. This function
+# places the light bulbs there first.
 def setup_solver(board, numbered_black_boxes):
     board_range = [0, 1, 2, 3, 4, 5, 6]
 
@@ -50,25 +52,15 @@ def setup_solver(board, numbered_black_boxes):
     return get_white_cells(board)
 
 
+# Function returns a list of white cells currently present in board
 def get_white_cells(board):
     white_cells = []
-    # Determine whit cells in board
     for col in board:
         for cell in col:
             if cell.state == 0:
                 white_cells.append([cell.x, cell.y])
     return white_cells
 
-# Function finds a white cell in game board for solver algorithm to place
-# a bulb in. If no remaining white cells exist in the board, return False
-def find_white_cell(board, white_cell):
-    for col in board:
-        for cell in col:
-            if cell.state == 0:
-                white_cell[0] = cell.x
-                white_cell[1] = cell.y
-                return False
-    return True
 
 # Function tallies number of light bulbs around numbered box cell
 def num_box_tally(board, numbered_box):
@@ -78,6 +70,7 @@ def num_box_tally(board, numbered_box):
         return len(list_of_bulbs)
     else:
         return 0
+
 
 # Function determines cells adjacent to desired cell
 def find_adjacent(board, cell, cell_type):
@@ -155,6 +148,7 @@ def solver(board, cells_to_try, tried_cells):
                 func.update_beams(board)
                 # Update list of white cells now present in board
                 cells_to_try = get_white_cells(board)
+
                 # Recursively call solver() function until all placements are deemed valid
                 # or final solution is found to be valid and function needs to backtrack bulb placement
                 result = solver(board, cells_to_try, tried_cells)
@@ -167,23 +161,12 @@ def solver(board, cells_to_try, tried_cells):
                     func.update_beams(board)
                     # Update list of white cells now present in board
                     cells_to_try = get_white_cells(board)
-                    # Removed unsuccessfully attempted cell from list
-                    #cells_to_try.remove([x, y])
 
-            # If placement was invalid, remove cell from list of potential values to try
-            #cells_to_try.remove([x, y])
-            print('placement invalid, try next cell')
-
-
-    # If all cells assinged a value, determine if certificate solution is valid.
-    # If puzzle solved, send completion message. Else return False to backtrack solution.
-    print('tried all cells currently in cells_to_try: CHECKING SOLUTION')
+    # If all cells in cells_to_try have been assigned, determine if certificate solution is valid.
+    # If puzzle solved, send completion message.
     if algo.verifier(board):
         return True
-    # if algo.verifier(board, light_bulb_cells, numbered_black_boxes):
-    # sg.popup('Puzzle solved!', title='Note:')
+    # If solution was invalid, return False to backtrack solution to find next possible
+    # valid step to solve puzzle
     else:
-        # If placement results in invalid solution, backtrack to find next possible
-        # valid step to solve puzzle
-        print('Solution not found: BACKTRACKING')
         return False

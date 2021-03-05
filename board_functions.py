@@ -1,4 +1,5 @@
-# File contains function that performs cell value updates to the game board
+# File contains functions that perform cell value and game board updates in response
+# to user's choices, verifier.py or solver.py's needs.
 
 
 # Function loads game board black box setup from .txt file and
@@ -38,34 +39,31 @@ def load_black_boxes(board, blankBlackBox, numberedBlackBox):
         board[row][col].assign_cell(new_state)
 
 
-
 # Function resets the board to initial state (removes all light bulbs and 'beams')
 def reset(board):
-    # Reset cells to white where applicable
     for col in board:
         for cell in col:
             if cell.state in [1, 2, 9]:
                 cell.assign_cell(0)
 
 
-
-# Function updates board with beams of each light bulb present (if applicable)
+# Function updates board with beams of each light bulb present (where applicable)
 def update_beams(board):
     board_range = [0, 1, 2, 3, 4, 5, 6]
-    lightBulbCells = []
-    # Clear board of old beams
+    light_bulb_cells = []
+    # Clear board of old beams and find light bulbs in board
     for col in board:
         for cell in col:
             if cell.state == 1:
-                lightBulbCells.append([cell.x, cell.y])
+                light_bulb_cells.append([cell.x, cell.y])
             elif cell.state == 2:
                 cell.assign_cell(0)
 
-    # Update color along right side of light bulb
-    # Add beam for each light bulb in board
-    for light_bulb in lightBulbCells:
+    # Add beams for each light bulb in board
+    for light_bulb in light_bulb_cells:
         x_index = light_bulb[0]
         y_index = light_bulb[1]
+
         # Update color below light bulb
         while True:
             y_index += 1
@@ -74,8 +72,8 @@ def update_beams(board):
             elif board[x_index][y_index].state == 0:
                 board[x_index][y_index].assign_cell(2)
 
-        y_index = light_bulb[1]
         # Update color above light bulb
+        y_index = light_bulb[1]
         while True:
             y_index -= 1
             if y_index not in board_range or board[x_index][y_index].state in range(3, 9):
@@ -83,8 +81,8 @@ def update_beams(board):
             elif board[x_index][y_index].state == 0:
                 board[x_index][y_index].assign_cell(2)
 
-        y_index = light_bulb[1]
         # Update color to left of light bulb:
+        y_index = light_bulb[1]
         while True:
             x_index -= 1
             if x_index not in board_range or board[x_index][y_index].state in range(3, 9):
@@ -92,8 +90,8 @@ def update_beams(board):
             elif board[x_index][y_index].state == 0:
                 board[x_index][y_index].assign_cell(2)
 
-        x_index = light_bulb[0]
         # Update color right of light bulb
+        x_index = light_bulb[0]
         while True:
             x_index += 1
             if x_index not in board_range or board[x_index][y_index].state in range(3, 9):

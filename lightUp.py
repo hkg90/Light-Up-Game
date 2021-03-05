@@ -41,7 +41,7 @@ image = [whiteIcon, lightBulbIcon, yellowIcon, blkBlank, blkZero, blkOne, blkTwo
          blkThree, blkFour, yellowIcon]
 # List of color themes for spaces displayed in game board (border color, background color)
 color = [('black', 'white'), ('black', 'yellow'), ('black', 'yellow'),
-         ('black', 'black'), ('black', 'pink'), ('black', 'pink'), ('black', 'pink'), ('black', 'pink'), ('black', 'black'), ('black', 'yellow')]
+         ('black', 'black'), ('black', 'black'), ('black', 'black'), ('black', 'black'), ('black', 'black'), ('black', 'black'), ('black', 'yellow')]
 
 
 # Setting for menu buttons
