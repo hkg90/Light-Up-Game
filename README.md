@@ -1,5 +1,5 @@
 This program uses PySimpleGUI to run the GUI interface for the user to play
- the game.
+ the game. 
  
  Install PySimpleGUI:
  - In your Shell command prompt input the following to install PySimpleGUI: 
@@ -7,4 +7,4 @@ This program uses PySimpleGUI to run the GUI interface for the user to play
 
 
  Run the program (program requires at least version 3 of Python):
-  $ python3 lightUp.py
+  $ python lightUp.py

@@ -1,10 +1,17 @@
+# Denise Suter CS 325 W2021
+# Portfolio Project - Light Up Game
+# This program initiates a Light Up Game (read this article for more on the game https://en.wikipedia.org/wiki/Light_Up_(puzzle))
+# with a GUI (created using PySimpleGUI). Depending on the solution submitted by the user, they will receive a pop-up message
+# indicating they correctly or incorrectly solved the puzzle.
+
 import PySimpleGUI as sg
 import board_functions as func
 import verifier as algo
 import solver as auto
 
 
-# Reference light bulb .png file: https://iconarchive.com/search?q=lightbulb
+# Note: For list of references of resources used in creating this program, refer to 'source references.txt' file.T
+# To determine how to execute program, please refer to the README.md file.
 
 # Global constants for setting up game board:
 font = 'Arial 16 bold'
@@ -27,30 +34,29 @@ blkFour = b'iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARn
 whiteIcon = b'iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAAySURBVFhH7c6xAQAgCMTAx/13Bgt3oPDSpL3qWxY772sBAAAAAAAAAAAAAAAAAPwOSAZNiAQ82P7MAwAAAABJRU5ErkJggg=='
 yellowIcon = b'iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAAAA0SURBVFhH7c4xAQAgDMTAL/7V1kBZ8NCBy5L1ajqTxc77WgAAAAAAAAAAAAAAAAAAvwOSC24gAzAPqVgaAAAAAElFTkSuQmCC'
 
-# 0: white space, 1: light bulb image, 2: black box, 3: lit up (yellow space)
-
+# Image List Item:
+# 0: white space, 1: light bulb icon, 2: yellow 'beam' space, 3: blank black space, 4: black numbered box 0, 5: black numbered box 1,
+# 6: black numbered box 2, 7: black numbered box 3, 8: black numbered box 4, 9: yellow 'beam' space (for solver() algo to use)
 image = [whiteIcon, lightBulbIcon, yellowIcon, blkBlank, blkZero, blkOne, blkTwo,
          blkThree, blkFour, yellowIcon]
+# List of color themes for spaces displayed in game board (border color, background color)
 color = [('black', 'white'), ('black', 'yellow'), ('black', 'yellow'),
          ('black', 'black'), ('black', 'pink'), ('black', 'pink'), ('black', 'pink'), ('black', 'pink'), ('black', 'black'), ('black', 'yellow')]
 
+
 # Setting for menu buttons
-def menu_buttons(text, key=None, disabled=False, button_color=('grey',
-                                                               'blue')):
-    return sg.Button(text, pad=(10, 10), font=font, focus=False,
-                     key=key, disabled=disabled, button_color=button_color)
+def menu_buttons(text, key=None, disabled=False, button_color=('white', 'teal')):
+    return sg.Button(text, pad=(10, 10), font=font, focus=False, key=key, disabled=disabled, button_color=button_color)
 
 
-# Function creates buttons for each cell in board game
+# Creates each cell in board game as a button
 def grid_button(x, y):
     board[x][y] = button(x, y)
     return board[x][y].button
 
 
-
-
-
-# Class for game board's button objects
+# Class for game board's button objects and contains a function to update an
+# individual object's state.
 class button():
     def __init__(self, x, y):
         self.x = x
@@ -75,18 +81,17 @@ class button():
     # Function assigns new state to selected cell in board
     def assign_cell(self, state):
         self.state = state
-        # Update cell to white cell, light bulb cell or 'beam' cell
+        # Update cell to white cell, light bulb cell or yellow 'beam' cell
         if state in [0, 1, 2, 9]:
             text = ' '
-        # Update cell to black background with inside cell text ('' or number)
+        # Update cell to black background with cell text (' ' or number)
         elif state > 2:
+            # Make cell is unselectable/ changeable
             self.disabled = True
             text = ' '
-        # # Update cell to 'beam' color
-        # elif state == 3:
-        #     text = ' '
-        # Update
+        # Update cell background color
         self.color = color[self.state]
+        # Update window and button/ cell
         window[self.key].Widget['disabledforeground'] = 'black'
         self.button.Update(text=text, disabled=self.disabled,
                            image_data=image[self.state], image_size=(size),
@@ -104,53 +109,64 @@ board = [[0 for j in range(height)] for i in range(width)]
 # Create layout of GUI window
 layout = [[menu_buttons('Reset Board', key='-Reset Game-'), menu_buttons(
     'Auto-Solve', key='-Solve Game-'), menu_buttons(
-    'Submit', key='-Check Game-'),]]+[[grid_button(x, y) for x in range(
-    width)] for y in range(height)]
+    'Submit', key='-Check Game-'),]]+[[grid_button(x, y) for x in range(width)] for y in range(height)]
 
-# Create window to display game board
+# Create window to display game
 window = sg.Window('Light Up', layout=layout, finalize=True)
 
-# Read input game board file for game board's black boxes and respective
-# positions in board
+# Read input game board .txt file for game board's setup
 func.load_black_boxes(board, blankBlackBox, numberedBlackBox)
 
-# Main code to run the game/ runs game logic
+
+#~~~ Main code to run the game/ runs game logic ~~~#
 while True:
+    # Grab click event from GUI and determine which action to take per event value
     event, values = window.read()
 
     # Exit game if window closed
     if event == None:
         break
 
-    # Clear board if user hits "Reset" button
+    # Initiate 'Reset' command (from selected 'Reset Board' button) and clear
+    # the board of all beams and light bulbs
     elif event == '-Reset Game-':
         func.reset(board, lightBulbCells)
-        func.update_beams(board)
 
-    # Initiate 'Solver'
+    # Initiate 'Solver' command (from selected 'Solver' button) and
+    # auto-solve the puzzle for the user
     elif event == '-Solve Game-':
+        # Determine given light bulb placements (where applicable) and remaining
+        # white cells to submit to solver algorithm
         cells_to_try = auto.setup_solver(board, numberedBlackBox)
+        # If found valid solution, display confirmation message
         if auto.solver(board, cells_to_try, []):
             sg.popup('Puzzle solved!', title='Note:')
 
-    # Initiate 'Verifier'
+    # Initiate 'Verifier' command (from selected 'Submit' button) and
+    # determine if user's input solution is valid
     elif event == '-Check Game-':
-        game_result = algo.verifier(board)
-        if game_result:
+        # If valid, display success message
+        if algo.verifier(board):
             sg.popup('You win!', title='Note:')
+        # If invalid, display failed/ retry message
         else:
-            sg.popup('You lost... Try again!', title='Note:')
+            sg.popup("You didn't solve it... Try again!", title="Note:")
 
+    # If click was on a clickable board cell (white, yellow or light bulb icon)
     else:
+        # Pull x and y coordinates from event click
         x, y = event
 
+        # If clicked cell is a light bulb, update back to white space
         if board[x][y].state == 1:
             board[x][y].assign_cell(0)
-            lightBulbCells.remove([x, y])
+
+        # If clicked cell is a white space, update to light bulb
         elif board[x][y].state in [0, 2]:
             board[x][y].assign_cell(1)
-            lightBulbCells.append([x, y])
+
+        # Update board with light bulbs' beams (where applicable)
         func.update_beams(board)
 
-
-
+# Close window on exit
+window.close()
