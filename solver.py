@@ -1,96 +1,47 @@
-# File contains algorithm that solves the board for the user
-import PySimpleGUI as sg
+# This python file contains the solver algorithm that will determine a valid solution to the set
+# game board.
+
+
 import board_functions as func
 import verifier as algo
+
 
 # Function assigns light bulbs to pre-determined board cells (ex: A numbered 4 box requires 4 light bulbs to be placed
 # directly adjacent to it) and determines remaining to-be-assigned white cells in game board
 def setup_solver(board, numbered_black_boxes):
     board_range = [0, 1, 2, 3, 4, 5, 6]
-    pre_set_bulbs = []
 
-    # Determine if possible to pre-set bulbs for numbered boxes or pre-set squares to yellow
-    # as its not possible to place a light bulb there (ex: 0 box cannot have any bulbs near it)
+    # Determine if it's possible to pre-set bulbs for numbered boxes or pre-set squares to yellow
+    # as its not possible to place a light bulb there (ex: a 0 box cannot have any bulbs near it)
     for box in numbered_black_boxes:
-        y_index = box[0] - 1
         x_index = box[1] - 1
+        y_index = box[0] - 1
+        adjacent_cells = [[x_index, y_index + 1], [x_index, y_index - 1], [x_index + 1, y_index], [x_index - 1, y_index]]
         bulb_tally = 0
-        # Check if cell below numbered box is white
-        y_index += 1
-        if y_index in board_range and board[x_index][y_index].state == 0:
-            bulb_tally += 1
-            # If 0 box, set adjacent square to yellow - cannot assign bulb next to it
-            if box[2] == 0:
-                board[x_index][y_index].assign_cell(9)
 
-        # Check if cell above numbered box is white
-        y_index = box[0] - 1
-        y_index -= 1
-        if y_index in board_range and board[x_index][y_index].state == 0:
-            bulb_tally += 1
-            # If 0 box, set adjacent square to yellow - cannot assign bulb next to it
-            if box[2] == 0:
-                board[x_index][y_index].assign_cell(9)
+        # Determine if adjacent cells (where applicable) can have a bulb placed there
+        for cell in adjacent_cells:
+            x = cell[0]
+            y = cell[1]
+            # Check if cell below numbered box is a potential space for a bulb
+            # y_index += 1
+            if (x in board_range and y in board_range) and board[x][y].state == 0:
+                bulb_tally += 1
+                # If 0 box, set adjacent square to yellow - cannot assign bulb next to it
+                if box[2] == 0:
+                    board[x][y].assign_cell(9)
 
-        # Check if cell left of numbered box is white
-        y_index = box[0] - 1
-        x_index -= 1
-        if x_index in board_range and board[x_index][y_index].state == 0:
-            bulb_tally += 1
-            # If 0 box, set adjacent square to yellow - cannot assign bulb next to it
-            if box[2] == 0:
-                board[x_index][y_index].assign_cell(9)
-
-        # Check if cell right of numbered box is white
-        x_index = box[1] - 1
-        x_index += 1
-        if x_index in board_range and board[x_index][y_index].state == 0:
-            bulb_tally += 1
-            # If 0 box, set adjacent square to yellow - cannot assign bulb next to it
-            if box[2] == 0:
-                board[x_index][y_index].assign_cell(9)
-
-        # If available white squares directly adjacent to number of black box is equal to number of box,
+        # If white squares directly adjacent to number of black box is equal to number of box,
         # assign light bulb icons to those locations
         if bulb_tally == box[2]:
-
-            y_index = box[0] - 1
-            x_index = box[1] - 1
-            bulb_tally = 0
-            # If cell below numbered box is white, assign light bulb icon
-            y_index += 1
-            if y_index in board_range and board[x_index][y_index].state == 0:
-                board[x_index][y_index].assign_cell(1)
-                x = board[x_index][y_index].x
-                y = board[x_index][y_index].y
-                pre_set_bulbs.append([x, y])
-
-            # If cell above numbered box is white, assign light bulb icon
-            y_index = box[0] - 1
-            y_index -= 1
-            if y_index in board_range and board[x_index][y_index].state == 0:
-                board[x_index][y_index].assign_cell(1)
-                x = board[x_index][y_index].x
-                y = board[x_index][y_index].y
-                pre_set_bulbs.append([x, y])
-
-            # If cell left of numbered box is white, assign light bulb icon
-            y_index = box[0] - 1
-            x_index -= 1
-            if x_index in board_range and board[x_index][y_index].state == 0:
-                board[x_index][y_index].assign_cell(1)
-                x = board[x_index][y_index].x
-                y = board[x_index][y_index].y
-                pre_set_bulbs.append([x, y])
-
-            # If cell right of numbered box is white, assign light bulb icon
-            x_index = box[1] - 1
-            x_index += 1
-            if x_index in board_range and board[x_index][y_index].state == 0:
-                board[x_index][y_index].assign_cell(1)
-                x = board[x_index][y_index].x
-                y = board[x_index][y_index].y
-                pre_set_bulbs.append([x, y])
+            for cell in adjacent_cells:
+                x = cell[0]
+                y = cell[1]
+                if (x in board_range and y in board_range) and board[x][y].state == 0:
+                    board[x][y].assign_cell(1)
+                    # x = board[x_index][y_index].x
+                    # y = board[x_index][y_index].y
+                    #pre_set_bulbs.append([x, y])
 
     # Add beams to board
     func.update_beams(board)
@@ -186,14 +137,14 @@ def find_adjacent(board, cell, cell_type):
         # add to list_of_adj
         y_index = cell[1]
         x_index -= 1
-        if x_index in board_range and board[x_index][y_index].state == 0:
+        if x_index in board_range and board[x_index][y_index].state == 1:
             list_of_adj.append([x_index, y_index])
 
         # If cell right of box in question is a bulb,
         # add to list_of_adj
         x_index = cell[0]
         x_index += 1
-        if x_index in board_range and board[x_index][y_index].state == 0:
+        if x_index in board_range and board[x_index][y_index].state == 1:
             list_of_adj.append([x_index, y_index])
         return list_of_adj
 

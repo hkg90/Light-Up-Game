@@ -40,17 +40,8 @@ def load_black_boxes(board, blankBlackBox, numberedBlackBox):
 
 
 # Function resets the board to initial state (removes all light bulbs and 'beams')
-def reset(board, lightBulbCells):
-    # Reset status of light bulb cells to white
-    # for light_bulb in lightBulbCells:
-    #     x = light_bulb[0]
-    #     y = light_bulb[1]
-    #     board[x][y].assign_cell(0)
-
-    # Clear list
-    # lightBulbCells.clear()
-
-    # Reset yellow 'beam' cells to white
+def reset(board):
+    # Reset cells to white where applicable
     for col in board:
         for cell in col:
             if cell.state in [1, 2, 9]:

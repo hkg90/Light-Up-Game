@@ -130,7 +130,7 @@ while True:
     # Initiate 'Reset' command (from selected 'Reset Board' button) and clear
     # the board of all beams and light bulbs
     elif event == '-Reset Game-':
-        func.reset(board, lightBulbCells)
+        func.reset(board)
 
     # Initiate 'Solver' command (from selected 'Solver' button) and
     # auto-solve the puzzle for the user
