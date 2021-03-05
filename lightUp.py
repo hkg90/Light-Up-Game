@@ -134,7 +134,7 @@ while True:
 
     # Initiate 'Verifier'
     elif event == '-Check Game-':
-        game_result = algo.verifier(board, lightBulbCells, numberedBlackBox)
+        game_result = algo.verifier(board)
         if game_result:
             sg.popup('You win!', title='Note:')
         else:

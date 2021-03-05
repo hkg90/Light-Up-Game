@@ -85,7 +85,7 @@ def check_num_boxes(board, box):
     return True
 
 # Function that verifies if user's input solution is valid.
-def verifier(board, lightBulbCells, numberedBlackBox):
+def verifier(board):
     for row in board:
         for cell in row:
             # Ensure no white spaces remain on board, if yes then return False

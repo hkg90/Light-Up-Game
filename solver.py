@@ -118,16 +118,19 @@ def find_white_cell(board, white_cell):
 
 # Function tallies number of light bulbs around numbered box cell
 def num_box_tally(board, numbered_box):
-    cell_state = board[numbered_box[0]][numbered_box[1]].state - 3
+    cell_state = board[numbered_box[0]][numbered_box[1]].state - 4
     list_of_bulbs = find_adjacent(board, numbered_box, cell_state)
-    return len(list_of_bulbs)
+    if list_of_bulbs:
+        return len(list_of_bulbs)
+    else:
+        return 0
 
 # Function determines cells adjacent to desired cell
 def find_adjacent(board, cell, cell_type):
     board_range = [0, 1, 2, 3, 4, 5, 6]
     list_of_adj = []
-    y_index = cell[0] - 1
-    x_index = cell[1] - 1
+    x_index = cell[0]
+    y_index = cell[1]
 
     # If cell type is white cell, continue query to determine if cells adjacent are
     # or are not numbered boxes
@@ -135,34 +138,34 @@ def find_adjacent(board, cell, cell_type):
         # If cell below cell in question is a numbered box,
         # add to list_of_adj
         y_index += 1
-        if y_index in board_range and board[x_index][y_index].state > 2:
+        if y_index in board_range and board[x_index][y_index].state > 3:
             list_of_adj.append([x_index, y_index])
 
         # If cell above cell in question in question is a numbered box,
         # add to list_of_adj
-        y_index = cell[0] - 1
+        y_index = cell[1]
         y_index -= 1
-        if y_index in board_range and board[x_index][y_index].state > 2:
+        if y_index in board_range and board[x_index][y_index].state > 3:
             list_of_adj.append([x_index, y_index])
 
         # If cell left of cell in question is a numbered box,
         # add to list_of_adj
-        y_index = cell[0] - 1
+        y_index = cell[1]
         x_index -= 1
-        if x_index in board_range and board[x_index][y_index].state > 2:
+        if x_index in board_range and board[x_index][y_index].state > 3:
             list_of_adj.append([x_index, y_index])
 
         # If cell right of cell in question is a numbered box,
         # add to list_of_adj
-        x_index = cell[1] - 1
+        x_index = cell[0]
         x_index += 1
-        if x_index in board_range and board[x_index][y_index].state > 2:
+        if x_index in board_range and board[x_index][y_index].state > 3:
             list_of_adj.append([x_index, y_index])
         return list_of_adj
 
     # If cell type is numbered box cell, continue query to determine if cells adjacent are
     # occupied by light bulbs
-    if cell_type > 2:
+    if cell_type > 3:
         # If cell below box in question is a bulb,
         # add to list_of_adj
         y_index += 1
@@ -171,21 +174,21 @@ def find_adjacent(board, cell, cell_type):
 
         # If cell above box in question in question is a bulb,
         # add to list_of_adj
-        y_index = cell[0] - 1
+        y_index = cell[1]
         y_index -= 1
         if y_index in board_range and board[x_index][y_index].state == 1:
             list_of_adj.append([x_index, y_index])
 
         # If cell left of box in question is a bulb,
         # add to list_of_adj
-        y_index = cell[0] - 1
+        y_index = cell[1]
         x_index -= 1
         if x_index in board_range and board[x_index][y_index].state == 0:
             list_of_adj.append([x_index, y_index])
 
         # If cell right of box in question is a bulb,
         # add to list_of_adj
-        x_index = cell[1] - 1
+        x_index = cell[0]
         x_index += 1
         if x_index in board_range and board[x_index][y_index].state == 0:
             list_of_adj.append([x_index, y_index])
@@ -196,17 +199,19 @@ def valid_placement(board, cell, cell_type):
     # If potential cell type is a white cell, continue - no verification needed
     if cell_type == 0:
         return True
-    # If potential cell type is a light bulb, continue - no verification needed
+    # If potential cell type changing from white cell to light bulb, determine if
+    # its placement does not interfere with beams and numbered boxes (where applicable)
+    # on board
     else:
         # Verify bulb placement does not conflict with other beams
         if not algo.check_beams(board, cell):
             return False
         # Determine if cell has numbered black box(es) around it
-        adjacent_to_cell = find_adjacent(board, cell)
+        adjacent_to_cell = find_adjacent(board, cell, 0)
 
         # Verify bulb placement does not conflict with directly adjacent numbered box cells
         for num_box in adjacent_to_cell:
-            max_bulbs = board[num_box[0]][board[1]] - 3
+            max_bulbs = board[num_box[0]][num_box[1]].state - 4
             adj_bulbs = num_box_tally(board, num_box)
             # If numbered box already has maximum assigned bulbs directly adjacent to it, return
             # False as placement of another bulb adjacent to the box is not valid
@@ -219,38 +224,55 @@ def valid_placement(board, cell, cell_type):
 # Function recursively determines possible light bulb placements to generate wining certificate solution
 def solver(board, cells_to_try):
     #white_cell = [0, 0]
+    tried_cells = []
+    print('cells REMAINING:   ', cells_to_try)
 
-    for white_cell in cells_to_try:
-        # Determines cell to try placing bulb in. If puzzle solved, send completion message
-        if not cells_to_try:
-
+    # If all cells assinged a value, determine if certificate solution is valid.
+    # If puzzle solved, send completion message. Else return False to backtrack solution.
+    if not cells_to_try:
+        print('no more cells to try: CHECKING SOLUTION')
+        if algo.verifier(board):
             sg.popup('Puzzle solved!', title='Note:')
             return True
-            # if algo.verifier(board, light_bulb_cells, numbered_black_boxes):
-                # sg.popup('Puzzle solved!', title='Note:')
+        # if algo.verifier(board, light_bulb_cells, numbered_black_boxes):
+        # sg.popup('Puzzle solved!', title='Note:')
+        else:
+            return False
 
+    for white_cell in cells_to_try:
+        print('remaining cells to try:  ', cells_to_try)
+        print('trying to assign:  ', white_cell)
         # Set up x and y board coordinate values
         x = white_cell[0]
         y = white_cell[1]
 
-        for assignment in [1, 0]:
+        for assignment in [1]:
+        # for assignment in [1, 0]:
             # Check bulb placement
             if valid_placement(board, white_cell, assignment):
 
-                # Assign bulb
+                # Assign cell new state
                 board[x][y].assign_cell(assignment)
                 func.update_beams(board)
                 cells_to_try.remove([x, y])
+                print('temp assigned:  ', white_cell)
 
                 # Recursively call solver() function until all placements are deemed valid
                 # of need to backtrack placement
                 if solver(board, cells_to_try):
                     return True
 
-                # If placement fails, change back to white cell
+                # If temporary assignment fails, change back cells in board and backtrack solution
                 else:
                     board[x][y].assign_cell(0)
+                    func.update_beams(board)
+                    #cells_to_try.append([x, y])
+                    print('back tracking: unassigned ', white_cell)
+            # If placement was invalid, remove cell from list of potential values to try
+            #cells_to_try.remove([x, y])
+            print('placement invalid, try next cell')
 
-            # If placement results in invalid solution, backtrack to find next possible
-            # valid step to solve puzzle
-        return False
+    # If placement results in invalid solution, backtrack to find next possible
+    # valid step to solve puzzle
+    print('end of function BACKtracking')
+    return False
