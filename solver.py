@@ -41,9 +41,6 @@ def heuristics_solver(board, numbered_black_boxes):
                 y = cell[1]
                 if (x in board_range and y in board_range) and board[x][y].state == 0:
                     board[x][y].assign_cell(1)
-                    # x = board[x_index][y_index].x
-                    # y = board[x_index][y_index].y
-                    #pre_set_bulbs.append([x, y])
 
     # Add beams to board
     func.update_beams(board)
