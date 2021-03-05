@@ -130,7 +130,8 @@ while True:
     # Initiate 'Solver'
     elif event == '-Solve Game-':
         cells_to_try = auto.setup_solver(board, numberedBlackBox)
-        auto.solver(board, cells_to_try)
+        if auto.solver(board, cells_to_try, []):
+            sg.popup('Puzzle solved!', title='Note:')
 
     # Initiate 'Verifier'
     elif event == '-Check Game-':

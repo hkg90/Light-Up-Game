@@ -95,6 +95,11 @@ def setup_solver(board, numbered_black_boxes):
     # Add beams to board
     func.update_beams(board)
 
+    # Determine whit cells in board
+    return get_white_cells(board)
+
+
+def get_white_cells(board):
     white_cells = []
     # Determine whit cells in board
     for col in board:
@@ -102,8 +107,6 @@ def setup_solver(board, numbered_black_boxes):
             if cell.state == 0:
                 white_cells.append([cell.x, cell.y])
     return white_cells
-
-
 
 # Function finds a white cell in game board for solver algorithm to place
 # a bulb in. If no remaining white cells exist in the board, return False
@@ -222,57 +225,59 @@ def valid_placement(board, cell, cell_type):
 
 
 # Function recursively determines possible light bulb placements to generate wining certificate solution
-def solver(board, cells_to_try):
-    #white_cell = [0, 0]
-    tried_cells = []
-    print('cells REMAINING:   ', cells_to_try)
+def solver(board, cells_to_try, tried_cells):
 
-    # If all cells assinged a value, determine if certificate solution is valid.
-    # If puzzle solved, send completion message. Else return False to backtrack solution.
-    if not cells_to_try:
-        print('no more cells to try: CHECKING SOLUTION')
-        if algo.verifier(board):
-            sg.popup('Puzzle solved!', title='Note:')
-            return True
-        # if algo.verifier(board, light_bulb_cells, numbered_black_boxes):
-        # sg.popup('Puzzle solved!', title='Note:')
-        else:
-            return False
+    print('cells REMAINING:   ', cells_to_try)
+    print('cells TRIED:   ', tried_cells)
 
     for white_cell in cells_to_try:
-        print('remaining cells to try:  ', cells_to_try)
-        print('trying to assign:  ', white_cell)
-        # Set up x and y board coordinate values
-        x = white_cell[0]
-        y = white_cell[1]
+        if white_cell not in tried_cells:
+            print('remaining cells to try:  ', cells_to_try)
+            print('trying to assign:  ', white_cell)
+            # Set up x and y board coordinate values
+            x = white_cell[0]
+            y = white_cell[1]
 
-        for assignment in [1]:
-        # for assignment in [1, 0]:
-            # Check bulb placement
+            assignment = 1
+            #for assignment in [1]:
+            # for assignment in [1, 0]:
+                # Check bulb placement
             if valid_placement(board, white_cell, assignment):
 
                 # Assign cell new state
                 board[x][y].assign_cell(assignment)
-                func.update_beams(board)
-                cells_to_try.remove([x, y])
                 print('temp assigned:  ', white_cell)
+                func.update_beams(board)
+                #tried_cells.append([x, y])
+                cells_to_try = get_white_cells(board)
+                print('temp assigned- remaining cells to try: ', cells_to_try)
 
                 # Recursively call solver() function until all placements are deemed valid
                 # of need to backtrack placement
-                if solver(board, cells_to_try):
-                    return True
+                result = solver(board, cells_to_try, tried_cells)
 
                 # If temporary assignment fails, change back cells in board and backtrack solution
-                else:
+                if not result:
                     board[x][y].assign_cell(0)
-                    func.update_beams(board)
-                    #cells_to_try.append([x, y])
                     print('back tracking: unassigned ', white_cell)
+                    func.update_beams(board)
+                    cells_to_try = get_white_cells(board)
+                    cells_to_try.remove([x, y])
+
             # If placement was invalid, remove cell from list of potential values to try
             #cells_to_try.remove([x, y])
             print('placement invalid, try next cell')
 
-    # If placement results in invalid solution, backtrack to find next possible
-    # valid step to solve puzzle
-    print('end of function BACKtracking')
-    return False
+
+    # If all cells assinged a value, determine if certificate solution is valid.
+    # If puzzle solved, send completion message. Else return False to backtrack solution.
+    print('tried all cells currently in cells_to_try: CHECKING SOLUTION')
+    if algo.verifier(board):
+        return True
+    # if algo.verifier(board, light_bulb_cells, numbered_black_boxes):
+    # sg.popup('Puzzle solved!', title='Note:')
+    else:
+        # If placement results in invalid solution, backtrack to find next possible
+        # valid step to solve puzzle
+        print('Solution not found: BACKTRACKING')
+        return False
