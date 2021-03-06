@@ -7,7 +7,7 @@ This program uses PySimpleGUI to run the GUI interface for the user to play
  $ python -m pip install pysimplegui
 
 
- I ran this program locally on my computer using version 3 of python.
+ I ran this program locally on my computer using version 3.8.8 of python.
  Run the program (program requires at least version 3 of Python):
  $ python lightUp.py
  
