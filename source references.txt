@@ -10,8 +10,7 @@ Python program to convert icon .png to Base64 byte string:
 https://github.com/PySimpleGUI/PySimpleGUI/blob/master/DemoPrograms/Demo_Base64_Image_Encoder.py
 
 Light Up game board layout:
-- The board#.txt files are setup
-
+- The board1.txt or board2.txt files are the setup for the board
 https://www.puzzle-light-up.com/
 
 Creating program GUI:

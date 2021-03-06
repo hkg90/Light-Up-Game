@@ -25,8 +25,7 @@ def heuristics_solver(board, numbered_black_boxes):
         for cell in adjacent_cells:
             x = cell[0]
             y = cell[1]
-            # Check if cell below numbered box is a potential space for a bulb
-            # y_index += 1
+            # Check if cell is a potential space for a bulb
             if (x in board_range and y in board_range) and board[x][y].state == 0:
                 bulb_tally += 1
                 # If 0 box, set adjacent square to yellow - cannot assign bulb next to it
@@ -81,9 +80,7 @@ def find_adjacent(board, cell, cell_type):
     # If yes, add to list
     if cell_type == 0:
         for cell in adjacent_cells:
-            # If cell below cell in question is a numbered box,
-            # add to list_of_adj
-            # y_index += 1
+            # If cell below cell in question is a numbered box, add to list_of_adj
             x = cell[0]
             y = cell[1]
             if (x in board_range and y in board_range) and board[x][y].state > 3:
@@ -106,7 +103,7 @@ def valid_placement(board, cell, cell_type):
     # If potential cell type is a white cell, continue - no verification needed
     if cell_type == 0:
         return True
-    # If potential cell type changing from white cell to light bulb, determine if
+    # If potential cell type is changing from white cell to light bulb, determine if
     # its placement will interfere with beams and numbered boxes (where applicable)
     # on board
     else:

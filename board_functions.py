@@ -13,7 +13,6 @@ def load_black_boxes(board, blankBlackBox, numberedBlackBox):
         if '\n' in blank:
             blank = blank.strip()
         divided = list(map(int, blank.split(',')))
-
         blankBlackBox.append(divided)
 
     num_numbered = int(new_file.readline())

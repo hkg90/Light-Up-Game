@@ -2,7 +2,7 @@
 # Portfolio Project - Light Up Game
 # This program initiates a Light Up Game (read this article for more on the game https://en.wikipedia.org/wiki/Light_Up_(puzzle))
 # with a GUI (created using PySimpleGUI). Depending on the solution submitted by the user, they will receive a pop-up message
-# indicating they correctly or incorrectly solved the puzzle.
+# indicating they correctly or incorrectly solved the puzzle. Program was created with Python version 3.8.8
 
 import PySimpleGUI as sg
 import board_functions as func
@@ -10,7 +10,7 @@ import verifier as algo
 import solver as auto
 
 
-# Note: For list of references of resources used in creating this program, refer to 'source references.txt' file.T
+# Note: For list of references of resources used in creating this program, refer to 'source references.txt' file.
 # To determine how to execute program, please refer to the README.md file.
 
 # Global constants for setting up game board:
@@ -86,7 +86,7 @@ class button():
             text = ' '
         # Update cell to black background with cell text (' ' or number)
         elif state > 2:
-            # Make cell is unselectable/ changeable
+            # Make cell unselectable/ unchangeable
             self.disabled = True
             text = ' '
         # Update cell background color
@@ -98,7 +98,7 @@ class button():
                            button_color=self.color)
 
 
-#~~~ Initialize board theme and grid size ~~~#
+#~~~ Initialize window theme and board grid size and setup ~~~#
 
 #Set theme of GUI
 sg.change_look_and_feel('DarkBlue')

@@ -1,4 +1,4 @@
-# File contains the verifier() function that determines is an input certificate solution is valid
+# File contains the verifier algorithm that determines if an input certificate solution is valid
 # or invalid. Returns True for valid and False for invalid solutions.
 
 
@@ -80,7 +80,6 @@ def check_num_boxes(board, box):
     if x_index in board_range and board[x_index][y_index].state == 1:
         bulb_tally += 1
 
-    #x_index = box[0]
     # Determine if tally is valid
     if bulb_tally != inner_number:
         return False
